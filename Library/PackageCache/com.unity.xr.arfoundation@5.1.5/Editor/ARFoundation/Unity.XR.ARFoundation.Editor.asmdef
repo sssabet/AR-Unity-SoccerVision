@@ -1,0 +1,32 @@
+{
+    "name": "Unity.XR.ARFoundation.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Unity.XR.ARFoundation",
+        "Unity.XR.ARSubsystems",
+        "UnityEngine.SpatialTracking",
+        "Unity.XR.Management",
+        "Unity.XR.Management.Editor",
+        "Unity.XR.CoreUtils",
+        "Unity.InputSystem",
+        "Unity.XR.ARAnalytics.Editor",
+        "Unity.XR.ARFoundation.InternalUtils"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.xr.interaction.toolkit",
+            "expression": "2.1.0",
+            "define": "XRI_PRESENT"
+        }
+    ],
+    "noEngineReferences": false
+}

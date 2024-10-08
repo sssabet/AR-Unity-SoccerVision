@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e0688bbae6cedcd4a871944e38c19ec0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_EnvironmentPrefab: {instanceID: 0}
+  - m_FallbackEnvironmentPrefab: {fileID: 7576867131100388943, guid: c7b92c392902f4043a03a64032c02fe1,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

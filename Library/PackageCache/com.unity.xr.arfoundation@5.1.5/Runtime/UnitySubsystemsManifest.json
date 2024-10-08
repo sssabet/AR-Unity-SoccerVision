@@ -1,0 +1,15 @@
+{
+    "name": "XR Simulation Plug-in",
+    "version": "1.0.0",
+    "libraryName": "XRSimulationSubsystem",
+    "inputs": [
+        {
+            "id": "XRSimulation-Input"
+        }
+    ],
+    "meshings": [
+        {
+            "id": "XRSimulation-Meshing"
+        }
+    ]
+}

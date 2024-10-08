@@ -1,0 +1,1 @@
+A *trackable* is a special component that represents anything that can be detected and tracked in the real world. Planes, point clouds, anchors, environment probes, faces, body, images, and 3D objects are all examples of objects with corresponding trackable components.

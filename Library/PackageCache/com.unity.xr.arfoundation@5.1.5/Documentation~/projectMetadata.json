@@ -1,0 +1,7 @@
+{
+    "xref": [
+        "com.unity.xr.arkit@5.1",
+        "com.unity.xr.arcore@5.1",
+        "com.unity.xr.meta-openxr@1.0",
+        "com.unity.visualscripting"],
+}

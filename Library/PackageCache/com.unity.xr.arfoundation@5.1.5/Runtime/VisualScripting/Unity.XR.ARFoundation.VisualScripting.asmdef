@@ -1,0 +1,25 @@
+{
+    "name": "Unity.XR.ARFoundation.VisualScripting",
+    "rootNamespace": "UnityEngine.XR.ARFoundation.VisualScripting",
+    "references": [
+        "Unity.XR.ARSubsystems",
+        "Unity.XR.ARFoundation",
+        "Unity.VisualScripting.Core",
+        "Unity.VisualScripting.Flow"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.visualscripting",
+            "expression": "1.8.0",
+            "define": "VISUALSCRIPTING_1_8_OR_NEWER"
+        }
+    ],
+    "noEngineReferences": false
+}
