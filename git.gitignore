@@ -1,0 +1,84 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+[Bb]ee/
+[Uu]serSettings/
+
+# Asset meta files should be included, but skip specific build-related files
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.mdb
+*.bak
+*.orig
+*.save
+*.dmp
+*.log
+*.log.meta
+
+# Project-specific NuGet files
+Assets/NuGet.config
+Assets/packages.config
+
+# Unity generated files and logs
+*.apk
+*.aab
+*.asset
+*.unitypackage
+*.webm
+*.webm.meta
+*.prefab
+*.prefab.meta
+
+# Visual Studio settings and backups
+.vscode/
+.vscode/*
+.idea/
+.idea/*
+*.tmproj
+*.tm_settings
+*.vscode
+*.project
+*.importsettings
+*.userdata
+.vscode/settings.json
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/dictionaries
+.idea/libraries
+
+# JetBrains Rider
+.idea/
+*.idea/*
+*.idea_modules/
+.idea/.idea_modules
+*.idea/.name
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/libraries
+.idea/artifacts
+.idea_modules/
+
+# Other system or environment files
+*.DS_Store
+*.swp
+*.swo
+Thumbs.db
