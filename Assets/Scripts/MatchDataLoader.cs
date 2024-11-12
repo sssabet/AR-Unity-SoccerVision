@@ -45,10 +45,12 @@ public class MatchDataLoader : MonoBehaviour
     private FrameList matchData;
     private int currentFrameIndex = 0;
     private Dictionary<int, GameObject> playerObjects = new Dictionary<int, GameObject>();
+    
     private List<GameObject> refereeObjects = new List<GameObject>();
 
     void Start()
     {
+        Color DarkGreen = new Color(0.2f, 0.4f, 0.1f);
         team0Material = new Material(Shader.Find("Standard"));
         team0Material.color = Color.blue;
 
@@ -106,10 +108,15 @@ public class MatchDataLoader : MonoBehaviour
         Frame frame = matchData.frames[frameIndex];
         HashSet<int> currentFramePlayerIds = new HashSet<int>();
 
+        // Process regular players (excluding goalkeepers)
         if (frame.players != null && frame.players.Count > 0)
         {
             foreach (Player player in frame.players)
             {
+                // Skip players who are already classified as goalkeepers
+                if (frame.goalkeepers.Exists(gk => gk.id == player.id))
+                    continue;
+
                 currentFramePlayerIds.Add(player.id);
                 Vector3 position = MapPositionToPitch(player.position);
 
@@ -118,17 +125,58 @@ public class MatchDataLoader : MonoBehaviour
                 {
                     playerGO = playerObjects[player.id];
                     playerGO.transform.position = position;
+                    playerGO.transform.rotation = Quaternion.Euler(0, -90, 0);
                 }
                 else
                 {
-                    playerGO = Instantiate(playerPrefab, position, Quaternion.identity, transform);
+                    playerGO = Instantiate(playerPrefab, position, Quaternion.Euler(0, -90, 0), transform);
                     ApplyTeamMaterial(playerGO, player.team_id);
                     playerObjects[player.id] = playerGO;
 
                     Animator animator = playerGO.GetComponent<Animator>();
-                    animator.SetFloat("speed", 0.1f); // Trigger initial idle animation
                 }
             }
+        }
+
+        // Process goalkeepers separately
+        if (frame.goalkeepers != null && frame.goalkeepers.Count > 0)
+        {
+            foreach (Player goalkeeper in frame.goalkeepers)
+            {
+                currentFramePlayerIds.Add(goalkeeper.id);
+                Vector3 position = MapPositionToPitch(goalkeeper.position);
+
+                GameObject goalkeeperGO;
+                if (playerObjects.ContainsKey(goalkeeper.id))
+                {
+                    goalkeeperGO = playerObjects[goalkeeper.id];
+                    goalkeeperGO.transform.position = position;
+                    goalkeeperGO.transform.rotation = Quaternion.Euler(0, -90, 0);
+                }
+                else
+                {
+                    goalkeeperGO = Instantiate(playerPrefab, position, Quaternion.Euler(0, -90, 0), transform);
+                    ApplyTeamMaterial(goalkeeperGO, goalkeeper.team_id);
+                    playerObjects[goalkeeper.id] = goalkeeperGO;
+
+                    Animator animator = goalkeeperGO.GetComponent<Animator>();
+                }
+            }
+        }
+
+        // Clean up any players that are not present in this frame
+        List<int> playersToRemove = new List<int>();
+        foreach (var kvp in playerObjects)
+        {
+            if (!currentFramePlayerIds.Contains(kvp.Key))
+            {
+                Destroy(kvp.Value);
+                playersToRemove.Add(kvp.Key);
+            }
+        }
+        foreach (int id in playersToRemove)
+        {
+            playerObjects.Remove(id);
         }
 
         ProcessReferees(frame);
