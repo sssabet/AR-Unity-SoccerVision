@@ -96,7 +96,6 @@ public class MatchDataLoader : MonoBehaviour
             yield return null;
         }
     }
-
     void DisplayFrame(int frameIndex)
     {
         if (frameIndex < 0 || frameIndex >= matchData.frames.Count)
@@ -108,61 +107,71 @@ public class MatchDataLoader : MonoBehaviour
         Frame frame = matchData.frames[frameIndex];
         HashSet<int> currentFramePlayerIds = new HashSet<int>();
 
-        // Process regular players (excluding goalkeepers)
-        if (frame.players != null && frame.players.Count > 0)
+    // Process regular players (excluding goalkeepers)
+    if (frame.players != null && frame.players.Count > 0)
+    {
+        foreach (Player player in frame.players)
         {
-            foreach (Player player in frame.players)
+            if (frame.goalkeepers.Exists(gk => gk.id == player.id))
+                continue;
+
+            currentFramePlayerIds.Add(player.id);
+            Vector3 position = MapPositionToPitch(player.position);
+
+            GameObject playerGO;
+            if (playerObjects.ContainsKey(player.id))
             {
-                // Skip players who are already classified as goalkeepers
-                if (frame.goalkeepers.Exists(gk => gk.id == player.id))
-                    continue;
+                playerGO = playerObjects[player.id];
+                playerGO.transform.position = position;
+                playerGO.transform.rotation = Quaternion.Euler(0, -90, 0);
+            }
+            else
+            {
+                GameObject customPrefab = GetPlayerPrefab(player.team_id, player.id);
+                GameObject prefabToUse = customPrefab != null ? customPrefab : playerPrefab;
 
-                currentFramePlayerIds.Add(player.id);
-                Vector3 position = MapPositionToPitch(player.position);
-
-                GameObject playerGO;
-                if (playerObjects.ContainsKey(player.id))
+                playerGO = Instantiate(prefabToUse, position, Quaternion.Euler(0, -90, 0), transform);
+                playerGO.transform.localScale = new Vector3(0.038f, 0.038f, 0.038f);
+                if (player.team_id == 1)
                 {
-                    playerGO = playerObjects[player.id];
-                    playerGO.transform.position = position;
-                    playerGO.transform.rotation = Quaternion.Euler(0, -90, 0);
+                    playerGO.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);; // the ronaldo prefeb should be smaller
                 }
-                else
-                {
-                    playerGO = Instantiate(playerPrefab, position, Quaternion.Euler(0, -90, 0), transform);
-                    ApplyTeamMaterial(playerGO, player.team_id);
-                    playerObjects[player.id] = playerGO;
+                playerObjects[player.id] = playerGO;
 
-                    Animator animator = playerGO.GetComponent<Animator>();
-                }
+                Animator animator = playerGO.GetComponent<Animator>();
             }
         }
+    }
 
-        // Process goalkeepers separately
-        if (frame.goalkeepers != null && frame.goalkeepers.Count > 0)
+    // Process goalkeepers
+    if (frame.goalkeepers != null && frame.goalkeepers.Count > 0)
+    {
+        foreach (Player goalkeeper in frame.goalkeepers)
         {
-            foreach (Player goalkeeper in frame.goalkeepers)
+            currentFramePlayerIds.Add(goalkeeper.id);
+            Vector3 position = MapPositionToPitch(goalkeeper.position);
+
+            GameObject goalkeeperGO;
+            if (playerObjects.ContainsKey(goalkeeper.id))
             {
-                currentFramePlayerIds.Add(goalkeeper.id);
-                Vector3 position = MapPositionToPitch(goalkeeper.position);
+                goalkeeperGO = playerObjects[goalkeeper.id];
+                goalkeeperGO.transform.position = position;
+                goalkeeperGO.transform.rotation = Quaternion.Euler(0, -90, 0);
+            }
+            else
+            {
+                GameObject customPrefab = GetPlayerPrefab(goalkeeper.team_id, goalkeeper.id);
+                GameObject prefabToUse = customPrefab != null ? customPrefab : playerPrefab;
 
-                GameObject goalkeeperGO;
-                if (playerObjects.ContainsKey(goalkeeper.id))
-                {
-                    goalkeeperGO = playerObjects[goalkeeper.id];
-                    goalkeeperGO.transform.position = position;
-                    goalkeeperGO.transform.rotation = Quaternion.Euler(0, -90, 0);
-                }
-                else
-                {
-                    goalkeeperGO = Instantiate(playerPrefab, position, Quaternion.Euler(0, -90, 0), transform);
-                    ApplyTeamMaterial(goalkeeperGO, goalkeeper.team_id);
-                    playerObjects[goalkeeper.id] = goalkeeperGO;
+                goalkeeperGO = Instantiate(prefabToUse, position, Quaternion.Euler(0, -90, 0), transform);
+                goalkeeperGO.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f); // Scale the prefab here
+                ApplyTeamMaterial(goalkeeperGO, goalkeeper.team_id);
+                playerObjects[goalkeeper.id] = goalkeeperGO;
 
-                    Animator animator = goalkeeperGO.GetComponent<Animator>();
-                }
+                Animator animator = goalkeeperGO.GetComponent<Animator>();
             }
         }
+    }
 
         // Clean up any players that are not present in this frame
         List<int> playersToRemove = new List<int>();
@@ -206,6 +215,8 @@ public class MatchDataLoader : MonoBehaviour
 
                 GameObject refereeGO = refereeObjects[i];
                 refereeGO.transform.position = position;
+                refereeGO.transform.rotation = Quaternion.Euler(-90, -90, 0);
+
             }
         }
         else
@@ -218,14 +229,13 @@ public class MatchDataLoader : MonoBehaviour
     {
         while (refereeObjects.Count < requiredCount)
         {
-            GameObject refereeGO = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity, transform);
+            GameObject customRefereePrefab = GetRefereePrefab();
 
-            SkinnedMeshRenderer[] skinnedMeshRenderers = refereeGO.GetComponentsInChildren<SkinnedMeshRenderer>();
-            foreach (var renderer in skinnedMeshRenderers)
-            {
-                renderer.material = refereeMaterial;
-            }
-            
+            // If not found, fallback to playerPrefab or any other default
+            GameObject prefabToUse = (customRefereePrefab != null) ? customRefereePrefab : playerPrefab;
+
+            GameObject refereeGO = Instantiate(prefabToUse, Vector3.zero, Quaternion.identity, transform);
+
             refereeObjects.Add(refereeGO);
         }
 
@@ -236,6 +246,14 @@ public class MatchDataLoader : MonoBehaviour
             refereeObjects.RemoveAt(refereeObjects.Count - 1);
         }
     }
+
+    GameObject GetRefereePrefab()
+    {
+        string refereePath = "players/ref0/ref";
+        GameObject customRefPrefab = Resources.Load<GameObject>(refereePath);
+        return customRefPrefab;
+    }
+
 
     void ClearRefereeObjects()
     {
@@ -262,4 +280,21 @@ public class MatchDataLoader : MonoBehaviour
 
         return new Vector3(mirroredX, 0.1f, scaledY);
     }
+    GameObject GetPlayerPrefab(int teamId, int playerId)
+    {
+        // Construct the resource path based on team and player ID
+        string customPath = "players/team" + teamId + "/" + playerId;
+        GameObject customPrefab = Resources.Load<GameObject>(customPath);
+
+        // If no specific prefab found for that player ID, try loading the default (0)
+        if (customPrefab == null)
+        {
+            string defaultPath = "players/team" + teamId + "/0";
+            customPrefab = Resources.Load<GameObject>(defaultPath);
+        }
+
+        // Return the custom or default prefab. If both were not found, this will be null
+        return customPrefab;
+    }
+
 }
