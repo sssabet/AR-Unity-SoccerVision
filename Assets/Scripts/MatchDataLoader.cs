@@ -19,12 +19,19 @@ public class MatchDataLoader : MonoBehaviour
     }
 
     [System.Serializable]
+    public class Ball
+    {
+        public List<float> position;
+    }
+
+    [System.Serializable]
     public class Frame
     {
         public int frame_index;
         public List<Player> players;
         public List<Player> goalkeepers;
         public List<Referee> referees;
+        public List<Ball> balls;
     }
 
     [System.Serializable]
@@ -34,6 +41,7 @@ public class MatchDataLoader : MonoBehaviour
     }
 
     public GameObject playerPrefab;
+    public GameObject ballPrefab;
     public Material team0Material;
     public Material team1Material;
     public Material refereeMaterial;
@@ -47,6 +55,7 @@ public class MatchDataLoader : MonoBehaviour
     private Dictionary<int, GameObject> playerObjects = new Dictionary<int, GameObject>();
     
     private List<GameObject> refereeObjects = new List<GameObject>();
+    private List<GameObject> ballObjects = new List<GameObject>();
 
     void Start()
     {
@@ -96,6 +105,7 @@ public class MatchDataLoader : MonoBehaviour
             yield return null;
         }
     }
+
     void DisplayFrame(int frameIndex)
     {
         if (frameIndex < 0 || frameIndex >= matchData.frames.Count)
@@ -173,7 +183,7 @@ public class MatchDataLoader : MonoBehaviour
         }
     }
 
-        // Clean up any players that are not present in this frame
+        // Clean up players not in this frame
         List<int> playersToRemove = new List<int>();
         foreach (var kvp in playerObjects)
         {
@@ -189,6 +199,9 @@ public class MatchDataLoader : MonoBehaviour
         }
 
         ProcessReferees(frame);
+
+        // Process balls
+        ProcessBalls(frame);
     }
 
     void ApplyTeamMaterial(GameObject playerGO, int teamId)
@@ -230,12 +243,8 @@ public class MatchDataLoader : MonoBehaviour
         while (refereeObjects.Count < requiredCount)
         {
             GameObject customRefereePrefab = GetRefereePrefab();
-
-            // If not found, fallback to playerPrefab or any other default
             GameObject prefabToUse = (customRefereePrefab != null) ? customRefereePrefab : playerPrefab;
-
             GameObject refereeGO = Instantiate(prefabToUse, Vector3.zero, Quaternion.identity, transform);
-
             refereeObjects.Add(refereeGO);
         }
 
@@ -254,7 +263,6 @@ public class MatchDataLoader : MonoBehaviour
         return customRefPrefab;
     }
 
-
     void ClearRefereeObjects()
     {
         foreach (GameObject refereeGO in refereeObjects)
@@ -262,6 +270,53 @@ public class MatchDataLoader : MonoBehaviour
             Destroy(refereeGO);
         }
         refereeObjects.Clear();
+    }
+
+    void ProcessBalls(Frame frame)
+    {
+        if (frame.balls != null && frame.balls.Count > 0)
+        {
+            AdjustBallObjectsList(frame.balls.Count);
+
+            for (int i = 0; i < frame.balls.Count; i++)
+            {
+                Ball ball = frame.balls[i];
+                Vector3 position = MapPositionToPitch(ball.position);
+
+                GameObject ballGO = ballObjects[i];
+                ballGO.transform.position = position;
+                ballGO.transform.rotation = Quaternion.identity;
+            }
+        }
+        else
+        {
+            ClearBallObjects();
+        }
+    }
+
+    void AdjustBallObjectsList(int requiredCount)
+    {
+        while (ballObjects.Count < requiredCount)
+        {
+            GameObject newBall = Instantiate(ballPrefab, Vector3.zero, Quaternion.identity, transform);
+            ballObjects.Add(newBall);
+        }
+
+        while (ballObjects.Count > requiredCount)
+        {
+            GameObject ballGO = ballObjects[ballObjects.Count - 1];
+            Destroy(ballGO);
+            ballObjects.RemoveAt(ballObjects.Count - 1);
+        }
+    }
+
+    void ClearBallObjects()
+    {
+        foreach (GameObject ballGO in ballObjects)
+        {
+            Destroy(ballGO);
+        }
+        ballObjects.Clear();
     }
 
     Vector3 MapPositionToPitch(List<float> position)
@@ -280,6 +335,7 @@ public class MatchDataLoader : MonoBehaviour
 
         return new Vector3(mirroredX, 0.1f, scaledY);
     }
+
     GameObject GetPlayerPrefab(int teamId, int playerId)
     {
         // Construct the resource path based on team and player ID
