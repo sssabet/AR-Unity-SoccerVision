@@ -31,6 +31,7 @@
 *.dmp
 *.log
 *.log.meta
+*.blob
 
 # Project-specific NuGet files
 Assets/NuGet.config
