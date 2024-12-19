@@ -53,7 +53,6 @@ public class MatchDataLoader : MonoBehaviour
     private FrameList matchData;
     private int currentFrameIndex = 0;
     private Dictionary<int, GameObject> playerObjects = new Dictionary<int, GameObject>();
-    
     private List<GameObject> refereeObjects = new List<GameObject>();
     private List<GameObject> ballObjects = new List<GameObject>();
 
@@ -117,16 +116,16 @@ public class MatchDataLoader : MonoBehaviour
         Frame frame = matchData.frames[frameIndex];
         HashSet<int> currentFramePlayerIds = new HashSet<int>();
 
-    // Process regular players (excluding goalkeepers)
-    if (frame.players != null && frame.players.Count > 0)
-    {
-        foreach (Player player in frame.players)
+        // Process regular players (excluding goalkeepers)
+        if (frame.players != null && frame.players.Count > 0)
         {
-            if (frame.goalkeepers.Exists(gk => gk.id == player.id))
-                continue;
+            foreach (Player player in frame.players)
+            {
+                if (frame.goalkeepers.Exists(gk => gk.id == player.id))
+                    continue;
 
-            currentFramePlayerIds.Add(player.id);
-            Vector3 position = MapPositionToPitch(player.position);
+                currentFramePlayerIds.Add(player.id);
+                Vector3 position = MapPositionToPitch(player.position);
 
             GameObject playerGO;
             if (playerObjects.ContainsKey(player.id))
@@ -345,7 +344,9 @@ public class MatchDataLoader : MonoBehaviour
         // If no specific prefab found for that player ID, try loading the default (0)
         if (customPrefab == null)
         {
-            string defaultPath = "players/team" + teamId + "/0";
+            int num = Random.Range(0, 2);
+            string defaultPath = "players/team" + teamId + "/" + num;
+
             customPrefab = Resources.Load<GameObject>(defaultPath);
         }
 
